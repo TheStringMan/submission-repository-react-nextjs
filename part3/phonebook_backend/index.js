@@ -79,8 +79,6 @@ app.post('/api/persons', (request, response) => {
     })
   }
 
-  
-
   const person = {
     name: body.name,
     number: body.number,
@@ -89,7 +87,7 @@ app.post('/api/persons', (request, response) => {
 
   persons = persons.concat(person)
 
-  response.json(persons)
+  response.json(person)
 })
 
 const PORT = process.env.PORT || 3001
