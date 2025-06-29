@@ -22,6 +22,9 @@ let notes = [
   }
 ]
 
+app.get('/', function(req, res){
+  res.render('index.ejs');
+});
 
 app.get('/api/notes', (request, response) => {
   response.json(notes)
