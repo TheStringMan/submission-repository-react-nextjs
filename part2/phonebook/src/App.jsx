@@ -64,6 +64,13 @@ const PersonForm = ({people, onPeopleChange, onMessageChanged}) => {
             onMessageChanged(null)
           }, 5000)
         })
+        .catch(error => {
+          // this is the way to access the error message
+          onMessageChanged(error.response.data.error)
+          setTimeout(() => {
+            onMessageChanged(null)
+          }, 5000)
+        })
     }else{
       const personObject = { name: newName, number: newNumber }
 
@@ -77,6 +84,13 @@ const PersonForm = ({people, onPeopleChange, onMessageChanged}) => {
           onMessageChanged(
           `Added '${response.name}' `
           )
+          setTimeout(() => {
+            onMessageChanged(null)
+          }, 5000)
+        })
+        .catch(error => {
+          // this is the way to access the error message
+          onMessageChanged(error.response.data.error)
           setTimeout(() => {
             onMessageChanged(null)
           }, 5000)
