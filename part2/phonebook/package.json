@@ -1,5 +1,5 @@
 {
-  "name": "introdemo",
+  "name": "phonebook",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -11,20 +11,20 @@
     "server": "json-server -p 3001 db.json"
   },
   "dependencies": {
-    "axios": "^1.9.0",
-    "react": "^19.1.0",
-    "react-dom": "^19.1.0"
+    "axios": "^1.20.0",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8"
   },
   "devDependencies": {
-    "@eslint/js": "^9.25.0",
-    "@types/react": "^19.1.2",
-    "@types/react-dom": "^19.1.2",
-    "@vitejs/plugin-react": "^4.4.1",
-    "eslint": "^9.25.0",
-    "eslint-plugin-react-hooks": "^5.2.0",
-    "eslint-plugin-react-refresh": "^0.4.19",
-    "globals": "^16.0.0",
-    "json-server": "^1.0.0-beta.3",
-    "vite": "^6.3.5"
+    "@eslint/js": "^10.0.1",
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.4",
+    "@vitejs/plugin-react": "^6.1.0",
+    "eslint": "^10.9.0",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "eslint-plugin-react-refresh": "^0.5.4",
+    "globals": "^17.11.0",
+    "json-server": "^1.0.0-beta.15",
+    "vite": "^8.2.2"
   }
 }
