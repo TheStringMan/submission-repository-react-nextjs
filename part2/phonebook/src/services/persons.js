@@ -1,6 +1,6 @@
 import axios from "axios";
-// json-server (npm run server) serve i dati su questa porta/risorsa
-const baseUrl = "http://localhost:3001/api/persons";
+// path relativo: frontend e backend sono serviti dalla stessa origine
+const baseUrl = "/api/persons";
 
 const getAll = () => {
   const request = axios.get(baseUrl);
