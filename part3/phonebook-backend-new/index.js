@@ -1,8 +1,11 @@
+require("dotenv").config();
 const express = require("express");
 const morgan = require("morgan");
 // Token custom :body, usato nel formato di log qui sotto per mostrare il body delle POST
 morgan.token("body", (request) => JSON.stringify(request.body));
 const cors = require("cors");
+
+const Person = require("./models/person");
 
 const app = express();
 // Middleware: legge il body JSON delle richieste (es. POST) e lo mette in request.body
@@ -15,67 +18,42 @@ app.use(
 );
 app.use(express.static("dist"));
 
-let persons = [
-  {
-    name: "Arto Hellas",
-    number: "040-123456",
-    id: "1",
-  },
-  {
-    name: "Ada Lovelace",
-    number: "39-44-5323523",
-    id: "2",
-  },
-  {
-    name: "Dan Abramov",
-    number: "12-43-234345",
-    id: "3",
-  },
-  {
-    name: "Mary Poppendieck",
-    number: "39-23-6423122",
-    id: "4",
-  },
-];
-
 app.get("/", (request, response) => {
   response.send("<h1>Hello World!</h1>");
 });
 
 // GET /api/persons -> restituisce l'intero elenco dei contatti in JSON
 app.get("/api/persons", (request, response) => {
-  response.json(persons);
+  Person.find({}).then((persons) => {
+    response.json(persons);
+  });
 });
 
 // GET /api/persons/:id -> restituisce un singolo contatto, 404 se non esiste
-app.get("/api/persons/:id", (request, response) => {
+app.get("/api/persons/:id", (request, response, next) => {
   const id = request.params.id;
-  const person = persons.find((person) => person.id === id);
-
-  if (person) {
-    response.json(person);
-  } else {
-    response.status(404).end();
-  }
+  Person.findById(id)
+    .then((person) => {
+      if (person) {
+        response.json(person);
+      } else {
+        response.status(404).end();
+      }
+    })
+    .catch((error) => next(error));
 });
 
 // DELETE /api/persons/:id -> rimuove il contatto, 204 = successo senza contenuto da restituire
-app.delete("/api/persons/:id", (request, response) => {
-  const id = request.params.id;
-  persons = persons.filter((person) => person.id !== id);
-
-  response.status(204).end();
+app.delete("/api/persons/:id", (request, response, next) => {
+  Person.findByIdAndDelete(request.params.id)
+    .then((result) => {
+      response.status(204).end();
+    })
+    .catch((error) => next(error));
 });
 
-// genera un nuovo id come "massimo id esistente + 1" (convertito a stringa)
-const generateId = () => {
-  const maxId =
-    persons.length > 0 ? Math.max(...persons.map((p) => Number(p.id))) : 0;
-  return String(maxId + 1);
-};
-
 // POST /api/persons -> aggiunge un nuovo contatto dopo aver validato i dati in ingresso
-app.post("/api/persons", (request, response) => {
+app.post("/api/persons", (request, response, next) => {
   const body = request.body;
 
   if (!body.name || !body.number) {
@@ -83,22 +61,38 @@ app.post("/api/persons", (request, response) => {
     return response.status(400).json({
       error: "name or number missing",
     });
-  } else if (persons.find((p) => p.name === body.name)) {
-    // 400 = Bad Request: il nome deve essere unico in rubrica
-    return response.status(400).json({
-      error: "name must be unique",
-    });
   }
 
-  const person = {
+  const person = new Person({
     name: body.name,
     number: body.number,
-    id: generateId(),
-  };
+  });
 
-  persons = persons.concat(person);
+  person
+    .save()
+    .then((savedPerson) => {
+      response.json(savedPerson);
+    })
+    .catch((error) => next(error));
+});
 
-  response.json(person);
+app.put("/api/persons/:id", (request, response, next) => {
+  const { name, number } = request.body;
+
+  Person.findById(request.params.id)
+    .then((person) => {
+      if (!person) {
+        return response.status(404).end();
+      }
+
+      person.name = name;
+      person.number = number;
+
+      return person.save().then((updatedPerson) => {
+        response.json(updatedPerson);
+      });
+    })
+    .catch((error) => next(error));
 });
 
 const unknownEndpoint = (request, response) => {
@@ -107,7 +101,22 @@ const unknownEndpoint = (request, response) => {
 
 app.use(unknownEndpoint);
 
-const PORT = process.env.PORT || 3001;
+const errorHandler = (error, request, response, next) => {
+  console.error(error.message);
+
+  if (error.name === "CastError") {
+    return response.status(400).send({ error: "malformatted id" });
+  } else if (error.name === "ValidationError") {
+    return response.status(400).json({ error: error.message });
+  }
+
+  next(error);
+};
+
+// this has to be the last loaded middleware, also all the routes should be registered before this!
+app.use(errorHandler);
+
+const PORT = process.env.PORT;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });

@@ -62,8 +62,8 @@ const App = () => {
           setNewName("");
           setNewNumber("");
         })
-        .catch(() => {
-          alert(`impossibile aggiungere ${newName}`);
+        .catch((error) => {
+          alert(error.response.data.error);
         });
     }
   };
