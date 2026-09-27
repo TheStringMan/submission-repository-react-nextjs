@@ -45,7 +45,29 @@ blogRouter.get("/:id", async (request, response) => {
 });
 
 blogRouter.delete("/:id", async (request, response) => {
-  await Blog.findByIdAndDelete(request.params.id);
+  // senza token (o con token non valido) jwt.verify lancia JsonWebTokenError -> 401
+  const decodedToken = jwt.verify(request.token, process.env.SECRET);
+  if (!decodedToken.id) {
+    return response.status(401).json({ error: "token invalid" });
+  }
+
+  const blog = await Blog.findById(request.params.id);
+  if (!blog) {
+    return response.status(204).end();
+  }
+
+  // 403: sei autenticato, ma non sei il creatore di questo blog
+  if (!blog.user || blog.user.toString() !== decodedToken.id) {
+    return response
+      .status(403)
+      .json({ error: "only the creator can delete a blog" });
+  }
+
+  await blog.deleteOne();
+  await User.findByIdAndUpdate(decodedToken.id, {
+    $pull: { blogs: blog._id },
+  });
+
   response.status(204).end();
 });
 

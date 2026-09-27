@@ -174,17 +174,76 @@ describe("when there is initially some blogs saved", () => {
 
   // sotto-scenario annidato: tutto ciò che riguarda la cancellazione di un blog
   describe("deletion of a blog", () => {
-    test("succeeds with status 204 if id is valid", async () => {
-      const blogsAtStart = await helper.blogsInDb();
-      const blogToDelete = blogsAtStart[0];
+    let owner;
+    let token;
+    let blogToDelete;
 
-      await api.delete(`/api/blogs/${blogToDelete.id}`).expect(204);
+    // crea un utente, ci si logga, e crea un blog suo: solo il creatore può cancellarlo
+    beforeEach(async () => {
+      await User.deleteMany({});
+      const passwordHash = await bcrypt.hash("sekret", 10);
+      owner = await new User({ username: "blogowner", passwordHash }).save();
+
+      const loginResponse = await api
+        .post("/api/login")
+        .send({ username: "blogowner", password: "sekret" });
+      token = loginResponse.body.token;
+
+      const created = await api
+        .post("/api/blogs")
+        .set("Authorization", `Bearer ${token}`)
+        .send({ title: "To be deleted", author: "Owner", url: "http://x.com" });
+      blogToDelete = created.body;
+    });
+
+    test("succeeds with status 204 if the creator deletes it", async () => {
+      await api
+        .delete(`/api/blogs/${blogToDelete.id}`)
+        .set("Authorization", `Bearer ${token}`)
+        .expect(204);
 
       const blogsAtEnd = await helper.blogsInDb();
-
       const ids = blogsAtEnd.map((b) => b.id);
       assert(!ids.includes(blogToDelete.id));
-      assert.strictEqual(blogsAtEnd.length, helper.initialBlogs.length - 1);
+      assert.strictEqual(blogsAtEnd.length, helper.initialBlogs.length);
+
+      // il riferimento nell'utente non deve restare orfano
+      const ownerAtEnd = await User.findById(owner._id);
+      const userBlogIds = ownerAtEnd.blogs.map((id) => id.toString());
+      assert(!userBlogIds.includes(blogToDelete.id));
+    });
+
+    test("fails with status 401 if token is not provided", async () => {
+      await api.delete(`/api/blogs/${blogToDelete.id}`).expect(401);
+
+      const blogsAtEnd = await helper.blogsInDb();
+      assert.strictEqual(blogsAtEnd.length, helper.initialBlogs.length + 1);
+    });
+
+    test("fails with status 401 if token is invalid", async () => {
+      await api
+        .delete(`/api/blogs/${blogToDelete.id}`)
+        .set("Authorization", "Bearer not-a-real-token")
+        .expect(401);
+
+      const blogsAtEnd = await helper.blogsInDb();
+      assert.strictEqual(blogsAtEnd.length, helper.initialBlogs.length + 1);
+    });
+
+    test("fails with status 403 if the user is not the creator", async () => {
+      const passwordHash = await bcrypt.hash("sekret2", 10);
+      await new User({ username: "someoneelse", passwordHash }).save();
+      const otherLogin = await api
+        .post("/api/login")
+        .send({ username: "someoneelse", password: "sekret2" });
+
+      await api
+        .delete(`/api/blogs/${blogToDelete.id}`)
+        .set("Authorization", `Bearer ${otherLogin.body.token}`)
+        .expect(403);
+
+      const blogsAtEnd = await helper.blogsInDb();
+      assert.strictEqual(blogsAtEnd.length, helper.initialBlogs.length + 1);
     });
   });
 

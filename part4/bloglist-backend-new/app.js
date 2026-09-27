@@ -32,6 +32,13 @@ app.use('/api/blogs', blogsRouter)
 app.use('/api/users', usersRouter)
 app.use('/api/login', loginRouter)
 
+// attiva solo in modalità test: nessun rischio che qualcuno azzeri
+// il database vero (sviluppo/produzione) chiamando questa route per errore
+if (process.env.NODE_ENV === 'test') {
+  const testingRouter = require('./controllers/testing')
+  app.use('/api/testing', testingRouter)
+}
+
 app.use(customMiddleware.unknownEndpoint)
 // this has to be the last loaded middleware, also all the routes should be registered before this!
 app.use(customMiddleware.errorHandler)
