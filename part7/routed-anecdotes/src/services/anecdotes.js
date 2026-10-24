@@ -16,12 +16,24 @@ const createNew = async (object) => {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(object),
   })
-  
+
   if (!response.ok) {
     throw new Error('Failed to create anecdote')
   }
-  
+
   return await response.json()
 }
 
-export default { getAll, createNew }
+const deleteAnecdote = async (id) => {
+  const response = await fetch(`${baseUrl}/${id}`, {
+    method: 'DELETE',
+  })
+
+  if (!response.ok) {
+    throw new Error('Failed to delete anecdote')
+  }
+
+  return await response.json()
+}
+
+export default { getAll, createNew, deleteAnecdote }

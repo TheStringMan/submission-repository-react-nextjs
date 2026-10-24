@@ -1,0 +1,17 @@
+{
+  "name": "anecdotes-tests",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "playwright test",
+    "verify:tests-exist": "node verify-tests-exist.mjs",
+    "verify:tests-not-vacuous": "node verify-tests-not-vacuous.mjs",
+    "test:mutation": "node verify-tests-mutation.mjs",
+    "verify:tests-are-real": "npm run verify:tests-not-vacuous && npm run test:mutation"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.55.0",
+    "json-server": "^1.0.0-beta.15"
+  }
+}
