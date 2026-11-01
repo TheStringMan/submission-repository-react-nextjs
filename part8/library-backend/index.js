@@ -1,32 +1,32 @@
-const { ApolloServer } = require("@apollo/server");
-const { startStandaloneServer } = require("@apollo/server/standalone");
-const { v1: uuid } = require("uuid");
+const { ApolloServer } = require('@apollo/server')
+const { startStandaloneServer } = require('@apollo/server/standalone')
+const { v1: uuid } = require('uuid')
 
 let authors = [
   {
-    name: "Robert Martin",
-    id: "afa51ab0-344d-11e9-a414-719c6709cf3e",
+    name: 'Robert Martin',
+    id: 'afa51ab0-344d-11e9-a414-719c6709cf3e',
     born: 1952,
   },
   {
-    name: "Martin Fowler",
-    id: "afa5b6f0-344d-11e9-a414-719c6709cf3e",
+    name: 'Martin Fowler',
+    id: 'afa5b6f0-344d-11e9-a414-719c6709cf3e',
     born: 1963,
   },
   {
-    name: "Fyodor Dostoevsky",
-    id: "afa5b6f1-344d-11e9-a414-719c6709cf3e",
+    name: 'Fyodor Dostoevsky',
+    id: 'afa5b6f1-344d-11e9-a414-719c6709cf3e',
     born: 1821,
   },
   {
-    name: "Joshua Kerievsky", // birthyear not known
-    id: "afa5b6f2-344d-11e9-a414-719c6709cf3e",
+    name: 'Joshua Kerievsky', // birthyear not known
+    id: 'afa5b6f2-344d-11e9-a414-719c6709cf3e',
   },
   {
-    name: "Sandi Metz", // birthyear not known
-    id: "afa5b6f3-344d-11e9-a414-719c6709cf3e",
+    name: 'Sandi Metz', // birthyear not known
+    id: 'afa5b6f3-344d-11e9-a414-719c6709cf3e',
   },
-];
+]
 
 /*
  * Suomi:
@@ -44,55 +44,55 @@ let authors = [
 
 let books = [
   {
-    title: "Clean Code",
+    title: 'Clean Code',
     published: 2008,
-    author: "Robert Martin",
-    id: "afa5b6f4-344d-11e9-a414-719c6709cf3e",
-    genres: ["refactoring"],
+    author: 'Robert Martin',
+    id: 'afa5b6f4-344d-11e9-a414-719c6709cf3e',
+    genres: ['refactoring'],
   },
   {
-    title: "Agile software development",
+    title: 'Agile software development',
     published: 2002,
-    author: "Robert Martin",
-    id: "afa5b6f5-344d-11e9-a414-719c6709cf3e",
-    genres: ["agile", "patterns", "design"],
+    author: 'Robert Martin',
+    id: 'afa5b6f5-344d-11e9-a414-719c6709cf3e',
+    genres: ['agile', 'patterns', 'design'],
   },
   {
-    title: "Refactoring, edition 2",
+    title: 'Refactoring, edition 2',
     published: 2018,
-    author: "Martin Fowler",
-    id: "afa5de00-344d-11e9-a414-719c6709cf3e",
-    genres: ["refactoring"],
+    author: 'Martin Fowler',
+    id: 'afa5de00-344d-11e9-a414-719c6709cf3e',
+    genres: ['refactoring'],
   },
   {
-    title: "Refactoring to patterns",
+    title: 'Refactoring to patterns',
     published: 2008,
-    author: "Joshua Kerievsky",
-    id: "afa5de01-344d-11e9-a414-719c6709cf3e",
-    genres: ["refactoring", "patterns"],
+    author: 'Joshua Kerievsky',
+    id: 'afa5de01-344d-11e9-a414-719c6709cf3e',
+    genres: ['refactoring', 'patterns'],
   },
   {
-    title: "Practical Object-Oriented Design, An Agile Primer Using Ruby",
+    title: 'Practical Object-Oriented Design, An Agile Primer Using Ruby',
     published: 2012,
-    author: "Sandi Metz",
-    id: "afa5de02-344d-11e9-a414-719c6709cf3e",
-    genres: ["refactoring", "design"],
+    author: 'Sandi Metz',
+    id: 'afa5de02-344d-11e9-a414-719c6709cf3e',
+    genres: ['refactoring', 'design'],
   },
   {
-    title: "Crime and punishment",
+    title: 'Crime and punishment',
     published: 1866,
-    author: "Fyodor Dostoevsky",
-    id: "afa5de03-344d-11e9-a414-719c6709cf3e",
-    genres: ["classic", "crime"],
+    author: 'Fyodor Dostoevsky',
+    id: 'afa5de03-344d-11e9-a414-719c6709cf3e',
+    genres: ['classic', 'crime'],
   },
   {
-    title: "Demons",
+    title: 'Demons',
     published: 1872,
-    author: "Fyodor Dostoevsky",
-    id: "afa5de04-344d-11e9-a414-719c6709cf3e",
-    genres: ["classic", "revolution"],
+    author: 'Fyodor Dostoevsky',
+    id: 'afa5de04-344d-11e9-a414-719c6709cf3e',
+    genres: ['classic', 'revolution'],
   },
-];
+]
 
 /*
   you can remove the placeholder query once your first one has been implemented
@@ -126,10 +126,7 @@ const typeDefs = /* GraphQL */ `
       genres: [String!]!
     ): Book
 
-    editAuthor(
-      name: String!
-      setBornTo: Int!
-    ): Author
+    editAuthor(name: String!, setBornTo: Int!): Author
   }
 
   type Query {
@@ -138,7 +135,7 @@ const typeDefs = /* GraphQL */ `
     allBooks(author: String, genre: String): [Book!]!
     allAuthors: [Author!]!
   }
-`;
+`
 
 const resolvers = {
   Query: {
@@ -148,22 +145,22 @@ const resolvers = {
     // senza nessuno dei due, ritorna semplicemente tutti i libri.
     allBooks: (root, args) => {
       if (!args.author && !args.genre) {
-        return books;
+        return books
       }
-      let filteredBooks = books;
+      let filteredBooks = books
       if (args.author) {
         filteredBooks = filteredBooks.filter(
           (book) => book.author === args.author,
-        );
+        )
       }
       // i due filtri si combinano: se sono presenti entrambi i parametri,
       // il secondo filtra ulteriormente il risultato già ridotto dal primo.
       if (args.genre) {
         filteredBooks = filteredBooks.filter((book) =>
           book.genres.includes(args.genre),
-        );
+        )
       }
-      return filteredBooks;
+      return filteredBooks
     },
     allAuthors: () => authors,
   },
@@ -171,16 +168,14 @@ const resolvers = {
     addBook: (root, args) => {
       // se l'autore del nuovo libro non è ancora in "authors", lo creiamo al volo
       // (born resta null: lo si imposta più avanti con la mutation editAuthor)
-      const authorExists = authors.some(
-        (author) => author.name === args.author,
-      );
+      const authorExists = authors.some((author) => author.name === args.author)
       if (!authorExists) {
         const newAuthor = {
           name: args.author,
           id: uuid(),
           born: null,
-        };
-        authors.push(newAuthor);
+        }
+        authors.push(newAuthor)
       }
       const newBook = {
         title: args.title,
@@ -188,40 +183,40 @@ const resolvers = {
         author: args.author,
         id: uuid(),
         genres: args.genres,
-      };
-      books.push(newBook);
-      return newBook;
+      }
+      books.push(newBook)
+      return newBook
     },
     // null (non un errore) se il nome non corrisponde a nessun autore salvato
     editAuthor: (root, args) => {
-      const author = authors.find((author) => author.name === args.name);
+      const author = authors.find((author) => author.name === args.name)
       if (!author) {
-        return null;
+        return null
       }
       // author è lo stesso oggetto referenziato dentro l'array "authors":
       // modificarlo qui aggiorna già l'array, non serve un .map() per riscriverlo
-      author.born = args.setBornTo;
-      return author;
-    }
+      author.born = args.setBornTo
+      return author
+    },
   },
   Author: {
     // resolver custom perché "bookCount" non è un campo salvato sugli autori:
     // va ricavato contando i libri di "books" con lo stesso nome d'autore
     bookCount: (root) => {
-      const authorName = root.name;
-      const booksByAuthor = books.filter((book) => book.author === authorName);
-      return booksByAuthor.length;
+      const authorName = root.name
+      const booksByAuthor = books.filter((book) => book.author === authorName)
+      return booksByAuthor.length
     },
   },
-};
+}
 
 const server = new ApolloServer({
   typeDefs,
   resolvers,
-});
+})
 
 startStandaloneServer(server, {
   listen: { port: 4000 },
 }).then(({ url }) => {
-  console.log(`Server ready at ${url}`);
-});
+  console.log(`Server ready at ${url}`)
+})
